@@ -1,0 +1,38 @@
+services:
+  web:
+    build: .
+    env_file:
+      - .env
+    environment:
+      DB_HOST: db
+    volumes:
+      - .:/code
+  web_migrate:
+    extends:
+      service: web
+    command: python /code/mysite/manage.py migrate
+    depends_on:
+      - db
+  web_run:
+    extends:
+      service: web
+    command: python /code/mysite/manage.py runserver 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - web_migrate
+    environment:
+      PYTHONPATH: "/code/mysite"
+      DJANGO_SETTINGS_MODULE: "mysite.settings"
+  db:
+    image: postgres:16.2
+    restart: always
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    environment:
+      - POSTGRES_DB=${DB_NAME:-postgres}
+      - POSTGRES_USER=${DB_USER:-postgres}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-postgres}
