@@ -71,3 +71,4 @@ cd mysite
 python manage.py migrate
 python manage.py runserver
 ```
+# Class-Django
